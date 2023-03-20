@@ -1,7 +1,9 @@
 class RestaurantPizzasController < ApplicationController
+  rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
+  skip_before_action :verify_authenticity_token, only: [:destroy]
     def index
       restaurant_pizzas = RestaurantPizza.all
-      render json: restaurant_pizzas
+      render json: restaurant_pizzas,  except: [:created_at, :updated_at]
     end
   
     def show
@@ -35,6 +37,9 @@ class RestaurantPizzasController < ApplicationController
     end
   
     private
+    def record_not_found
+      render json: { error: 'Record not found' }, status: :not_found
+    end
   
     def restaurant_pizza_params
       params.require(:restaurant_pizza).permit(:restaurant_id, :pizza_id, :price)

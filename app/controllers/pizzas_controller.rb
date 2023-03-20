@@ -1,7 +1,8 @@
 class PizzasController < ApplicationController
+  rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
     def index
       pizzas = Pizza.all
-      render json: pizzas
+      render json: pizzas, except: [:created_at, :updated_at]
     end
   
     def show
@@ -40,6 +41,9 @@ class PizzasController < ApplicationController
     end
   
     private
+    def record_not_found
+      render json: { error: 'Record not found' }, status: :not_found
+    end
   
     def pizza_params
       params.require(:pizza).permit(:name, :description, :image_url)

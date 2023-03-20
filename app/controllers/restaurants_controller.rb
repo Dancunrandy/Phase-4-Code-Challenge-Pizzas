@@ -1,12 +1,13 @@
 class RestaurantsController < ApplicationController
+  rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
     def index
       restaurants = Restaurant.all
-      render json: restaurants, status: :ok
+      render json: restaurants, except: [:created_at, :updated_at], status: :ok
     end
   
     def show
       restaurant = Restaurant.find(params[:id])
-      render json: restaurant, status: :ok
+      render json: restaurant, except: [:created_at, :updated_at], status: :ok
     rescue ActiveRecord::RecordNotFound
       render json: { error: "Restaurant not found" }, status: :not_found
     end
@@ -35,6 +36,9 @@ class RestaurantsController < ApplicationController
     end
     
     private
+    def record_not_found
+      render json: { error: 'Record not found' }, status: :not_found
+    end
     
     def restaurant_params
     params.require(:restaurant).permit(:name)
